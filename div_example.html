@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DIV Example</title>
+</head>
+<body>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+    <!--<div id="div1">A</div>-->
+    <!--<div id="div2">B</div>-->
+    <!--<div id="div3">C</div>-->
+    <!--<div id="div4">D</div>-->
+
+
+    <button onclick="addData([20, 30, 50, 60])">Append</button>
+
+    <button onclick="removeData([10, 20])">Remove</button>
+
+
+    <script>
+        var selector = d3.select('body')
+            .selectAll('div')
+            .data([10, 20, 30]);
+
+        var entering = selector.enter();
+
+        entering.append('div')
+            .text(function (d) {
+                return d;
+            })
+            .attr("id",function (d, i) {
+                return "div" + i;
+            });
+
+        function addData(dataToRender) {
+            console.log("Enter to render function");
+
+            var selector = d3.select('body')
+                .selectAll('div')
+                .data(dataToRender);
+
+            var entering = selector.enter();
+
+            entering.append('div')
+                .text(function (d) {
+                    return d;
+                });
+
+            selector.text(function (d) {
+                return d;
+            });
+
+            console.log(entering);
+        }
+
+        function removeData(dataToRender) {
+            console.log("Enter to removeData");
+
+            var selector = d3.select('body')
+                                .selectAll('div')
+                                .data(dataToRender);
+
+            var exiters = selector.exit();
+
+            exiters.remove();
+        }
+
+    </script>
+</body>
+</html>

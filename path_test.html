@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+    <script>
+        var width = 450;
+        var height = 450;
+
+        var data = [
+                {X: 10, Y: 10},
+                {X: 60, Y: 60},
+                {X: 80, Y: 20}
+        ];
+        var generator = d3.svg.line()
+            .x(function (d) {
+                return d.X;
+            })
+            .y(function (d) {
+                return d.Y;
+            });
+
+        var svg = d3.select('body')
+            .append('svg')
+            .attr({
+                width: width,
+                height: height
+            });
+
+        svg.append('path')
+            .datum(data)
+            .attr({
+                d: generator,
+                fill: 'none',
+                stroke: 'steelblue'
+            });
+
+        svg.append('path')
+            .datum(data)
+            .attr({
+                transform: 'translate(100, 0)',
+                d: generator,
+                fill: 'blue',
+                stroke: 'steelblue'
+            });
+
+    </script>
+</body>
+</html>

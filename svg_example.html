@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SVG Example</title>
+
+    <style>
+        svg rect {fill: red;}
+        svg rect#willBeGreen {fill: green;}
+    </style>
+</head>
+<body>
+
+
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+    <svg width="720" height="600">
+        <circle r="10" cx="40" cy="20" style="fill: red"></circle>
+        <circle r="15" cx="80" cy="40" style="fill: green"></circle>
+        <circle r="20" cx="120" cy="60" style="fill: blue"></circle>
+
+        <text x="10" y="20" fill="red" font-family="arial" font-size="16">
+            Content of the SVG text
+        </text>
+
+        <g transform="rotate(45, 50,50)">
+            <rect height="50" width="50" x="10" y="100"></rect>
+            <rect height="50" width="50" x="70" y="100" id="willBeGreen" transform="rotate(45, 95, 125)  scale(1.5)"></rect>
+            <rect height="50" width="50" x="130" y="100" style="fill: blue" transform="translate(30, 0)"></rect>
+        </g>
+    </svg>
+
+    <script>
+        var selector = d3.selectAll('circle')
+                        .style("fill", 'teal');
+    </script>
+</body>
+</html>

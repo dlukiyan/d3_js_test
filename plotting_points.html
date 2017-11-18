@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+    <script>
+        var url = "https://gist.githubusercontent.com/\n" +
+            "d3byex/520e6dcb30e673c149cc/raw/432623f00f6740021bdc13141612ac0b619\n" +
+            "6b022/corr_aapl_msft.csv";
+
+        var graphWidht = 400, graphHeight = 400;
+        var radius = 5;
+        var axisPadding = 5;
+
+        margin = {top: 10, right: 10, bottom: 50, left: 50};
+
+        totalWidth = graphWidht + margin.left + margin.right;
+        totalHeight = graphHeight + margin.top + margin.bottom;
+
+        d3.csv(url, function (error, rawData) {
+            var data = rawData.map(function (d) {
+               return {X: +d.AAPL, Y: +d.MSFT};
+            });
+
+            console.log("Data");
+            console.log(data);
+
+            var xExtent = d3.extent(data, function (d) {
+                return d.X;
+            });
+
+            var yExtent = d3.extent(data, function (d) {
+                return d.Y;
+            });
+
+            console.log("xExtent");
+            console.log(xExtent);
+
+            console.log("yExtent");
+            console.log(yExtent);
+
+            var maxExtent = d3.max(xExtent.concat(yExtent), function (d) {
+                return Math.abs(d);
+            });
+
+            console.log("Max Extent");
+            console.log(maxExtent);
+
+
+
+            var scale = d3.scale.linear()
+                .domain([maxExtent, -maxExtent])
+                .range([0, graphWidht]);
+
+            var svg = d3.select('body')
+                .append('svg')
+                .attr('width', totalWidth)
+                .attr('height', totalHeight);
+
+            var mainGroup = svg.append('g')
+                .attr({
+                   width: graphWidht,
+                   height: graphHeight,
+                   transform: "translate(" + margin.left + "," + margin.top + ")"
+                });
+
+            var leftAxisGroup = svg.append('g')
+                .attr({
+                   transform: "translate(" + (margin.left - axisPadding) + "," + margin.top + ")"
+                });
+
+            var leftAxis = d3.svg.axis()
+                .orient('left')
+                .scale(scale);
+
+            var leftAxisNodes = leftAxisGroup.call(leftAxis);
+
+            styleAxisNodes(leftAxisNodes);
+
+            var xAxisGroup = svg.append('g')
+                .attr({
+                   transform: "translate("+ margin.left + "," + (totalHeight - margin.bottom + axisPadding) + ")"
+                });
+
+            var xAxis = d3.svg.axis()
+                .orient('bottom')
+                .scale(scale);
+
+            var xAxisNodes = xAxisGroup.call(xAxis);
+
+            styleAxisNodes(xAxisNodes);
+
+            mainGroup.selectAll('circle')
+                .data(data)
+                .enter()
+                .append('circle')
+                .attr({
+                    cx: function (d) {return scale(d.X);},
+                    cy: function (d) {return scale(d.Y);},
+                    r: radius,
+                    fill: 'none',
+                    stroke: 'steelblue'
+                });
+
+            var yGridlinesAxis = d3.svg.axis().scale(scale).orient("left");
+            var yGridlinesNodes = svg.append('g')
+                .attr('transform', 'translate(' + (margin.left + graphWidht) + "," + margin.top + ")")
+                .call(yGridlinesAxis
+                    .tickSize(graphWidht + axisPadding, 0, 0)
+                    .tickFormat(""));
+
+            styleGridlineNodes(yGridlinesNodes);
+
+            var xGridlindesAxis = d3.svg.axis().scale(scale).orient('bottom');
+            var xGridlinesNodes = svg.append('g')
+                .attr('transform', "translate(" + margin.left + "," + margin.top + ")")
+                .call(xGridlindesAxis
+                    .tickSize(graphHeight + axisPadding, 0, 0)
+                    .tickFormat(""));
+
+            styleGridlineNodes(xGridlinesNodes);
+        });
+
+        function styleAxisNodes(axisNodes) {
+            axisNodes.selectAll('.domain')
+                .attr({
+                    fill: 'none',
+                    'stroke-width': 1,
+                    stroke: 'black'
+                });
+
+            axisNodes.selectAll('.tick line')
+                .attr({
+                    fill: 'none',
+                    'stroke-width': 1,
+                    stroke: 'black'
+                });
+        }
+
+        function styleGridlineNodes(axisNodes) {
+            axisNodes.selectAll(".domain")
+                .attr({
+                    fill: 'none',
+                    stroke: 'none'
+                });
+
+            axisNodes.selectAll('.tick line')
+                .attr({
+                   fill: 'none',
+                   'stroke-width': 1,
+                   stroke: 'lightgray'
+                });
+        }
+
+    </script>
+</body>
+</html>

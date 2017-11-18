@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+    <script>
+        var url_json = "https://gist.githubusercontent.com/d3byex/\n" +
+            "e5ce6526ba2208014379/raw/8fefb14cc18f0440dc00248f23cbf6aec80dcc13/\n" +
+            "walking_dead_s5.json";
+
+        var url_csv = "https://gist.githubusercontent.\n" +
+            "com/d3byex/e5ce6526ba2208014379/raw/8fefb14cc18f0440dc00248f23cbf6aec\n" +
+            "80dcc13/walking_dead_s5.csv";
+
+//        d3.json(url_json, function (error, data) {
+//            console.log("Data in JSON format")
+//            console.log(data[0]);
+//        });
+
+        d3.csv(url_csv, function (error, data) {
+            console.log("Data in CSV format");
+            console.log(data[0]);
+
+            console.log("Mapping data");
+            var mappedAndConverted = data.map(function (d) {
+               return{Episode: +d.Episode, USViewers: +d.USViewers, Title: d.Title}
+            });
+
+            console.log("Mapped data");
+            console.log(mappedAndConverted[0]);
+
+            var viewership = mappedAndConverted.map(function (d) {
+                return d.USViewers;
+            });
+
+            var minViewership = d3.min(viewership);
+            var maxViewership = d3.max(viewership);
+
+            var minBarHeight = 100, maxBarHeight = 400;
+
+            var yScale = d3.scale
+                .linear()
+                .domain([minViewership, maxViewership])
+                .range([minBarHeight, maxBarHeight]);
+
+            console.log("Scaled data");
+            console.log(minViewership + " -> " + yScale(minViewership));
+            console.log(maxViewership + " -> " + yScale(maxViewership));
+        });
+
+        console.log("Data in d3.js is loaded asynchronously");
+    </script>
+</body>
+</html>
