@@ -20,48 +20,59 @@
 </head>
 <body>
 <script src="http://d3js.org/d3.v4.min.js" charset="utf-8"></script>
+<script src="https://d3js.org/d3-selection-multi.v1.min.js" charset="utf-8"></script>
 
 <script>
     var mainData = {
         "id": "1",
         "name": "Mike and Marcia",
+        "freeze": "0",
         "children": [
             {
                 "id":"2",
                 "name": "Children",
+                "freeze": "0",
                 "children": [
                     {
                         "id":"3",
-                        "name": "Mikael"
+                        "name": "Mikael",
+                        "freeze": "0"
                     }
                 ]
             },
             {
                 "id":"4",
                 "name": "Pets",
+                "freeze": "0",
                 "children": [
                     {
                         "id":"5",
                         "name": "Dogs",
+                        "freeze":"0",
                         "children": [
                             {
                                 "id":"6",
-                                "name": "Bleu" },
+                                "name": "Bleu",
+                                "freeze": "0"},
                             {
                                 "id":"7",
-                                "name": "Tagg" }
+                                "name": "Tagg",
+                                "freeze": "0"}
                         ]
                     },
                     {
                         "id":"8",
                         "name": "Cats",
+                        "freeze" : "0",
                         "children": [
                             {
                                 "id":"9",
-                                "name": "Bob" },
+                                "name": "Bob",
+                                "freeze": "0"},
                             {
                                 "id":"10",
-                                "name": "Peanut" }
+                                "name": "Peanut",
+                                "freeze": "0"}
                         ]
                     }
                 ]
@@ -85,7 +96,7 @@
     var svg = d3.select('body').append('svg').attr("width", width).attr("height", height);
 
     var simulation = d3.forceSimulation()
-        .force("link", d3.forceLink().id(function(d) { return d.id; }).distance(50).strength(3))
+        .force("link", d3.forceLink().id(function(d) { return d.id; }))//.distance(10).strength(3))
         .force('collision', d3.forceCollide)
         .force("charge", d3.forceManyBody().strength(-100));
     //.force("center", d3.forceCenter(width / 2, height / 2));
@@ -111,6 +122,8 @@
         .append('line')
         .attr('stroke-width', '1');
 
+    var menu = contextMenu().items('first item', 'second option', 'third option');
+
     var visualNodes = svg.append('g').attr('class', 'nodes')
         .selectAll('circle')
         .data(nodes.descendants())
@@ -121,7 +134,11 @@
         .call(d3.drag()
             .on('start', dragStarted)
             .on('drag', dragged)
-            .on('end', dragEnded));
+            .on('end', dragEnded))
+        .on('contextmenu', function () {
+            d3.event.preventDefault();
+            menu(d3.mouse(this)[0], d3.mouse(this)[1]);
+        });
 
     simulation
         .nodes(nodes.descendants())
@@ -129,6 +146,8 @@
 
     simulation.force("link")
         .links(links);
+
+
 
 
     function ticked() {
@@ -163,6 +182,111 @@
 
         d.fx = null;
         d.fy = null;
+    }
+
+    function contextMenu(){
+        var menuWidth = 100, menuHeight=30;
+        var margin = 0.1;
+        var items = [];
+        var rescale = false;
+        var style = {
+            'rect' : {
+                'mouseout': {
+                    'fill': 'rgb(244, 244, 244)',
+                    'stroke': 'white',
+                    'stroke-width': '1px'
+                },
+                'mouseover': {
+                    'fill': 'rgb(200,200,200)'
+                }
+            },
+            'text' : {
+                'fill' : 'steelblue',
+                'font-size' : '13'
+            }
+        };
+
+        function menu(x, y)
+        {
+            d3.select('.context-menu').remove();
+            //scaleItems();
+
+            //Draw the menu
+            d3.select('svg')
+                .append('g').attr('class', 'context-menu')
+                .selectAll('tmp')
+                .data(items).enter()
+                .append('g').attr('class', 'menu-entry')
+                .on('mouseover', function(){
+                    var rect = d3.select(this).select('rect').styles(style.rect.mouseover);
+                })
+                .on('mouseout', function () {
+                    d3.select(this).select('rect').styles(style.rect.mouseout);
+                })
+                .style('cursor', 'pointer');
+
+            d3.selectAll('.menu-entry')
+                .append('rect')
+                .attr('x', x)
+                .attr('y', function (d, i) {return y + (i * menuHeight); })
+                .attr('width', menuWidth)
+                .attr('height', menuHeight)
+                .styles(style.rect.mouseout);
+
+            d3.selectAll('.menu-entry')
+                .append('text')
+                .text(function (d) { return d; })
+                .attr('x', x)
+                .attr('y', function (d, i) { return y + (i * menuHeight); })
+                .attr('dy', menuHeight - margin / 2)
+                .attr('dx', margin)
+                .style(style.text);
+
+            //Other interactions
+            d3.select('body')
+                .on('click', function () {
+                    d3.select('.context-menu').remove();
+                });
+        }
+
+        menu.items = function (e) {
+            if(!arguments.length) return items;
+
+            for(i in arguments) items.push(arguments[i]);
+            rescale = true;
+            return menu;
+        };
+
+        //Automatically set width, height, and margin;
+        function scaleItems() {
+            if(rescale){
+                d3.select('svg').selectAll('tmp')
+                    .data(items).enter()
+                    .append('text')
+                    .text(function (d) { return d; })
+                    .styles(style.text)
+                    .attr('x', -1000)
+                    .attr('y', -1000)
+                    .attr('class', 'tmp');
+
+
+                var z = d3.selectAll('.tmp')[0]
+                    .map(function (x) { return x.getBBox() });
+
+                menuWidth = d3.max(z.map(function (x) { return x.width; }))
+                margin = margin * menuWidth;
+                menuWidth = menuWidth + 2 * margin;
+
+                menuHeight = d3.max(z.map(function (x) { return x.height + margin / 2;}));
+
+                //cleanup
+                d3.selectAll('.tmp').remove();
+                rescale = false;
+
+            }
+        }
+
+        return menu;
     }
 </script>
 </body>
